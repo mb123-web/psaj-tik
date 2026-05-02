@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Dashboard PSAJ</title>
+    <style>
+        /* CSS: Mengatur Tampilan */
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #333; text-align: center; }
+        .timer-display { font-size: 3rem; text-align: center; margin: 20px 0; font-weight: bold; color: #2d89ef; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-timer { background: #2d89ef; color: white; width: 100%; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f9f9f9; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; border-left: 5px solid #2d89ef; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>My Study Plan</h2>
+    
+    <!-- Bagian Timer -->
+    <div class="timer-display" id="timer">25:00</div>
+    <button class="btn-timer" onclick="startTimer()">Mulai Fokus (Pomodoro)</button>
+
+    <hr style="margin: 20px 0; opacity: 0.3;">
+
+    <!-- Bagian To-Do List -->
+    <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Tambah tugas baru...">
+        <button class="btn-add" onclick="addTask()">Tambah</button>
+    </div>
+    <ul id="taskList"></ul>
+</div>
+
+<script>
+    // JS: Logika Interaktif
+    function addTask() {
+        let input = document.getElementById("taskInput");
+        if (input.value === "") return;
+        
+        let li = document.createElement("li");
+        li.innerHTML = `${input.value} <button onclick="this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;">X</button>`;
+        document.getElementById("taskList").appendChild(li);
+        input.value = "";
+    }
+
+    function startTimer() {
+        let timeLeft = 25 * 60;
+        const display = document.getElementById("timer");
+        
+        const countdown = setInterval(() => {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            display.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                alert("Waktu belajar selesai! Istirahat dulu.");
+            }
+            timeLeft--;
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>
