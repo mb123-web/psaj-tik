@@ -3,93 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Pro Dashboard</title>
+    <title>Pro Spec Analyzer - PSAJ Informatika</title>
+    <!-- Library untuk Grafik & Popup -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* CSS: Efek Modern & Responsif */
-        :root { --primary: #6366f1; --bg: #f8fafc; --card: #ffffff; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; }
-        
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.9); 
-            backdrop-filter: blur(10px); 
-            padding: 30px; border-radius: 24px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
-            width: 100%; max-width: 450px; border: 1px solid white;
-        }
-
-        h2 { color: #1e293b; margin-top: 0; font-weight: 800; text-align: center; letter-spacing: -1px; }
-        
-        .timer-box { background: #1e293b; color: #fbbf24; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; }
-        #timer { font-size: 3.5rem; font-weight: 900; font-family: monospace; }
-        
-        .btn { border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; width: 100%; }
-        .btn-main { background: var(--primary); color: white; margin-top: 10px; }
-        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
-
-        .input-area { display: flex; gap: 8px; margin-top: 20px; }
-        input { flex: 1; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
-
-        ul { padding: 0; margin-top: 20px; }
-        li { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f1f5f9; transition: 0.2s; }
-        li:hover { transform: scale(1.02); }
-        .delete-btn { color: #ef4444; cursor: pointer; font-weight: bold; }
+        :root { --primary: #00ff88; --accent: #6366f1; --bg: #0f172a; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; justify-content: center; padding: 20px; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 25px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
+        h1 { text-align: center; font-weight: 800; background: linear-gradient(to right, var(--primary), #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .info-box { background: #1e293b; padding: 15px; border-radius: 15px; margin: 15px 0; border-left: 4px solid var(--primary); }
+        .btn-run { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+        .btn-run:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        #gameResult { margin-top: 20px; display: none; padding: 15px; background: #334155; border-radius: 15px; }
+        .tag { display: inline-block; background: #064e3b; color: #34d399; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; margin: 5px; }
     </style>
 </head>
 <body>
 
 <div class="glass-card">
-    <h2>🚀 Study Flow</h2>
-    
-    <div class="timer-box">
-        <div id="timer">25:00</div>
-        <div style="font-size: 0.8rem; opacity: 0.8;">FOKUS MODE</div>
-    </div>
-    
-    <button class="btn btn-main" onclick="startTimer()">Mulai Sesi Belajar</button>
+    <h1>Spec Analyzer 2.0</h1>
+    <p style="text-align: center; font-size: 0.9rem; opacity: 0.8;">Ujian Praktek Informatika - PSAJ 2026</p>
 
-    <div class="input-area">
-        <input type="text" id="taskInput" placeholder="Apa fokusmu hari ini?">
-        <button class="btn btn-main" style="width: auto; margin:0;" onclick="addTask()">+</button>
+    <div class="info-box">
+        <div id="cpuText">CPU: Menunggu Analisis...</div>
+        <div id="ramText">RAM: Menunggu Analisis...</div>
     </div>
 
-    <ul id="taskList"></ul>
+    <canvas id="myChart" style="margin-bottom: 20px;"></canvas>
+
+    <button class="btn-run" onclick="startProcess()">SCAN PERFORMA SISTEM</button>
+
+    <div id="gameResult">
+        <h4 style="margin: 0 0 10px 0;">🎮 Game Yang Cocok:</h4>
+        <div id="gameList"></div>
+    </div>
 </div>
 
 <script>
-    // JS: Logika Interaktif
-    function addTask() {
-        const input = document.getElementById("taskInput");
-        if (input.value === "") return;
-        
-        const li = document.createElement("li");
-        li.innerHTML = `<span>${input.value}</span> <span class="delete-btn" onclick="this.parentElement.remove()">✕</span>`;
-        document.getElementById("taskList").appendChild(li);
-        input.value = "";
+    let chart;
+    function startProcess() {
+        Swal.fire({
+            title: 'Memulai Pindaian...',
+            text: 'Mengambil data hardware via Browser API',
+            timer: 1500,
+            showConfirmButton: false,
+            didOpen: () => { Swal.showLoading() }
+        }).then(() => { runDetection(); });
     }
 
-    function startTimer() {
-        let timeLeft = 25 * 60;
-        const display = document.getElementById("timer");
-        const btn = document.querySelector(".btn-main");
-        btn.disabled = true;
-        btn.style.opacity = "0.5";
+    function runDetection() {
+        const cpu = navigator.hardwareConcurrency || 4;
+        const ram = navigator.deviceMemory || 4;
         
-        const countdown = setInterval(() => {
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            display.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                alert("Waktu habis! Kerja bagus!");
-                btn.disabled = false;
-                btn.style.opacity = "1";
-            }
-            timeLeft--;
-        }, 1000);
+        document.getElementById('cpuText').innerText = `Prosesor: ${cpu} Threads Terdeteksi`;
+        document.getElementById('ramText').innerText = `Memori: ~${ram} GB RAM`;
+
+        // Update Chart
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if(chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['CPU Power', 'RAM Capacity'],
+                datasets: [{
+                    data: [cpu * 10, ram * 10],
+                    backgroundColor: ['#6366f1', '#00ff88'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: 'white' } } } }
+        });
+
+        // Rekomendasi Game
+        const list = document.getElementById('gameList');
+        const res = document.getElementById('gameResult');
+        res.style.display = 'block';
+        list.innerHTML = "";
+        
+        let games = ram >= 8 ? 
+            [{n:"Valorant", g:"High"}, {n:"GTA V", g:"Ultra"}, {n:"Forza 5", g:"Med"}] : 
+            [{n:"Roblox", g:"Max"}, {n:"Minecraft", g:"Fancy"}, {n:"Stardew", g:"Max"}];
+
+        games.forEach(g => {
+            list.innerHTML += `<span class="tag">${g.n} (${g.g})</span>`;
+        });
     }
 </script>
-
 </body>
 </html>
